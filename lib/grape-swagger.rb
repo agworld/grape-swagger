@@ -2,6 +2,13 @@ require 'kramdown'
 
 module Grape
   class API
+    # this removes the route prefix added by grape if the prefix option was
+    # specified in the API; this ensures that swagger documentation is built
+    # and displayed correctly
+    def self.get_path(route)
+      route.route_path.split(route.route_prefix).last
+    end
+
     class << self
       attr_reader :combined_routes
 
@@ -13,7 +20,7 @@ module Grape
 
         @combined_routes = {}
         routes.each do |route|
-          route_match = route.route_path.split(route.route_prefix).last.match('\/([\w|-]*?)[\.\/\(]')
+          route_match = get_path(route).match('\/([\w|-]*?)[\.\/\(]')
           next if route_match.nil?
           resource = route_match.captures.first
           next if resource.empty?
@@ -72,7 +79,7 @@ module Grape
 
               routes_array = routes.keys.map { |local_route|
                 next if routes[local_route].all? { |route| route.route_hidden }
-                { :path => "#{parse_path(route.route_path.gsub('(.:format)', ''),route.route_version)}/#{local_route}#{@@hide_format ? '' : '.{format}'}" }
+                { :path => "#{parse_path(Grape::API.get_path(route).gsub('(.:format)', ''),route.route_version)}/#{local_route}#{@@hide_format ? '' : '.{format}'}" }
               }.compact
 
               {
@@ -109,7 +116,7 @@ module Grape
                 operations.merge!({:responseClass => route.route_entity.to_s.split('::')[-1]}) if route.route_entity
                 operations.merge!({:errorResponses => http_codes}) unless http_codes.empty?
                 {
-                  :path => parse_path(route.route_path, api_version),
+                  :path => parse_path(Grape::API.get_path(route), api_version),
                   :operations => [operations]
                 }
               }.compact

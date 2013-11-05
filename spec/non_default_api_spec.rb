@@ -208,7 +208,7 @@ describe "options: " do
           "basePath"=>"http://example.org",
           "resourcePath"=>"",
           "apis"=>
-              [{"path"=>"/abc/something.{format}",
+              [{"path"=>"/something.{format}",
                 "operations"=>
                     [{"notes"=>nil,
                       "summary"=>"This gets something.",
@@ -250,7 +250,7 @@ describe "options: " do
           "basePath"=>"http://example.org",
           "resourcePath"=>"",
           "apis"=>
-              [{"path"=>"/abc/v20/something.{format}",
+              [{"path"=>"/v20/something.{format}",
                 "operations"=>
                     [{"notes"=>nil,
                       "summary"=>"This gets something.",
@@ -363,7 +363,7 @@ describe "options: " do
       get '/swagger_doc/something.json'
 
       JSON.parse(last_response.body)["apis"].each do |api|
-        api["path"].should start_with "/api/v1/"
+        api["path"].should start_with "/v1/"
       end
     end
   end
